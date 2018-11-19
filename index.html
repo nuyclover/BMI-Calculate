@@ -1,0 +1,278 @@
+<header>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="publics/default.css">
+    <script src="assets/js/bootstrap.min.js"></script>
+
+</header>
+
+<body>
+
+<div class="modal-dinamic" style="display: none">
+    <div class="modal-content">
+        <div class="col-form-label">
+            <label class="message-box">xxxx</label>
+        </div>
+        <div class="center-btn" style="margin-top:30px;">
+            <button type="submit" class="btn btn save-after">OK</button>
+        </div>
+    </div>
+</div>
+    <div class="container">
+
+        <h1 class="color-white">Expression</h1>
+        <section>
+            <div class="card-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-6">
+                            <h3>BMI</h3>
+                        </div>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="right-text">Name : </p>
+                                </div>
+                                <div class="col-6 mg-t-5">
+                                    <p class="name-box"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="left-label" for="name">Enter Your Name :</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="name" placeholder="Enter Your Name">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="left-label" for="weight">Weight :</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" class="form-control allowDecimal" id="weight" placeholder="Enter Weight">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="left-label" for="height">Height :</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" class="form-control allowDecimal" id="height" placeholder="Enter Height">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <label class="col-3">Your BMI : </label>
+                    <label class="col-9 result-bmi">0.00</label>
+                </div>
+                <hr>
+                <div class="center-btn">
+                    <button type="submit" class="btn btn save">Save</button>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="mg-t-30">
+            <div class="card-body">
+                <div class="form-group">
+                        <table class="table table-striped" id="myTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Height</th>
+                                    <th>Weight</th>
+                                    <th>BMI</th>
+                                    <th>Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody class="row-save">
+
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+
+<script src="assets/js/jquery-3.3.1.min.js"></script>
+
+<script>
+    var rowId = 1;
+    $(document).ready(function(e){
+
+        $('#name').on('keyup',function(e){
+            $('.name-box').html($(this).val());
+        });
+
+        $(".allowDecimal").on("keyup keypress blur",function (event) {
+            $(this).val($(this).val().replace(/[^0-9\.]/g,''));
+            if ($(this).val().indexOf('.') != -1) {
+                event.preventDefault();
+            }else{
+                calculateBMI();
+            }
+        });
+
+        $('.save').on('click',function(e){
+
+            if(!validateInput()){
+                return false;
+            }
+
+            var result = parseFloat($('.result-bmi').text());
+
+            if(result < 18.5) {
+                $('.message-box').text('น้ำหนักน้อยกว่ามาตรฐาน');
+            } else if(result >= 18.5 && result <= 22.9) {
+                $('.message-box').text('ปกติ');
+            } else if(result >= 23 && result <= 24.9) {
+                $('.message-box').text('อ้วนระดับ 1');
+            } else if(result >= 25 && result <= 29.9) {
+                $('.message-box').text('อ้วนระดับ 2');
+            } else if(result >= 30) {
+                $('.message-box').text('อ้วนระดับ 3');
+            }
+
+            $('.modal-dinamic').show();
+        });
+
+        $('.save-after').on('click',function(){
+            $('.modal-dinamic').hide();
+            saveToTable();
+        });
+    });
+
+    function calculateBMI(){
+        var weightValue = $('#weight').val();
+        var heightValue = $('#height').val();
+
+        mapCalulate(weightValue, heightValue);
+
+    }
+
+    function mapCalulate(weight, height){
+        var powTwoHeight = Math.pow(height, 2);
+        var result = (parseFloat(weight) / parseFloat(powTwoHeight) * 10000).toFixed(2);
+
+        $('.result-bmi').html(result);
+    }
+    
+    function saveToTable(){
+        var htmls = "";
+
+        htmls += "<tr class='column-add' id='row-"+rowId+"' data-id='"+rowId+"'>";
+        htmls += "<td id='name-row-"+rowId+"'>"+$('#name').val()+"</td>";
+        htmls += "<td id='height-row-"+rowId+"'>"+$('#height').val()+"</td>";
+        htmls += "<td id='weight-row-"+rowId+"'>"+$('#weight').val()+"</td>";
+
+        var result = parseFloat($('.result-bmi').text());
+
+        if(result < 18.5) {
+            htmls += "<td id='result-row-"+rowId+"' class='row-result color-red'>"+$('.result-bmi').text()+"</td>";
+        } else if(result >= 18.5 && result <= 23) {
+            htmls += "<td id='result-row-"+rowId+"' class='row-result color-green'>"+$('.result-bmi').text()+"</td>";
+        } else if(result >= 23 && result <= 30) {
+            htmls += "<td id='result-row-"+rowId+"' class='row-result color-flowerblue-blue'>"+$('.result-bmi').text()+"</td>";
+        } else {
+            htmls += "<td id='result-row-"+rowId+"' class='row-result color-blue'>"+$('.result-bmi').text()+"</td>";
+        }
+
+        htmls += "<td><button type='submit' class='btn btn-sm edit' onclick='editRowTable("+rowId+")'>Edit</button>&nbsp;<button type='submit' class='btn btn-sm delete' onclick='deleteRowTable("+rowId+")'>Delete</button></td>";
+        htmls += "</tr>";
+
+        $('.row-save').append(htmls);
+        rowId++;
+
+        clearInputData();
+        sortTable();
+    }
+
+    function validateInput(){
+        var name = $('#name').val();
+        var height = $('#height').val();
+        var weight = $('#weight').val();
+
+        if(!weight && !height && !name){
+            alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+        }else{
+            return true;
+        }
+    }
+
+    function clearInputData(){
+        $('#name').val("");
+        $('#height').val("");
+        $('#weight').val("");
+        $('.result-bmi').text(0.00);
+        $('.name-box').text("");
+    }
+
+    function editRowTable(id){
+        getRowEdit(id);
+
+    }
+
+    function getRowEdit(id){
+        console.log(id);
+        var resultName = $('#name-row-'+id).text();
+        var resultHeight = $('#height-row-'+id).text();
+        var resultWeight = $('#weight-row-'+id).text();
+        var resultCalculate = $('#result-row-'+id).text();
+        $('#name').val(resultName);
+        $('#height').val(resultHeight);
+        $('#weight').val(resultWeight);
+        $('.result-bmi').text(resultCalculate);
+        $('.name-box').text(resultName);
+
+        deleteRowTable(id);
+    }
+
+    function deleteRowTable(id){
+        $('#row-'+id).remove();
+    }
+
+    function sortTable() {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("myTable");
+        switching = true;
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[3];
+
+                console.log(x);
+                y = rows[i + 1].getElementsByTagName("TD")[3];
+
+                console.log(y);
+                if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+
+
+
+
+</script>
